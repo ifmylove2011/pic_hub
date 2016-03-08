@@ -69,4 +69,10 @@ public class ViewUtils {
 		Point size = new Point(dm.widthPixels, dm.heightPixels);
 		return size;
 	}
+
+	/* 获取默认大小 */
+	public static int getSize(){
+		DisplayMetrics dm = ContextUtils.getInstance().getResources().getDisplayMetrics();
+		return Math.min(dm.widthPixels,dm.heightPixels);
+	}
 }

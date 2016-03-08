@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.xter.pichub.R;
 import com.xter.pichub.util.LogUtils;
+import com.xter.pichub.util.ViewUtils;
 
 public class CascadeView extends View {
 
@@ -38,13 +39,11 @@ public class CascadeView extends View {
 	}
 
 	private boolean isReady;
-	private int totalWidth;
-	private int totalHeight;
+	private int totalSize;
 	private int imgSize;
 	private Bitmap[] bitmaps;
 
 	private int columns;
-	private int row;
 	private int imgCounts;
 
 	private Rect rect;
@@ -65,6 +64,7 @@ public class CascadeView extends View {
 		rect = new Rect();
 		paint = new Paint();
 
+		totalSize = ViewUtils.getSize();
 	}
 
 	@Override
@@ -98,9 +98,15 @@ public class CascadeView extends View {
 //				}
 //			}
 //			Log.i("size", ":" + totalWidth + "," + totalHeight + "-->" + imgSize);
-			int size = 360;
-			imgSize = size / columns;
-			setMeasuredDimension(size, size);
+			int tempSize ;
+			if(specHeightSize==0||specWidthSize==0)
+				tempSize = Math.max(specHeightSize,specWidthSize);
+			else
+				tempSize = Math.min(specHeightSize, specWidthSize);
+			totalSize = Math.min(totalSize,tempSize);
+			imgSize = totalSize / columns;
+			LogUtils.d("totalSize:"+totalSize);
+			setMeasuredDimension(totalSize, totalSize);
 		} else {
 			setMeasuredDimension(0, 0);
 		}
@@ -126,8 +132,7 @@ public class CascadeView extends View {
 		this.bitmaps = bitmaps;
 		imgCounts = bitmaps.length;
 		if(imgCounts==1)
-			columns = row = 1;
-		row = imgCounts % columns == 0 ? imgCounts / columns : imgCounts / columns + 1;
+			columns = 1;
 		isReady = true;
 		LogUtils.d("count"+imgCounts);
 		requestLayout();
