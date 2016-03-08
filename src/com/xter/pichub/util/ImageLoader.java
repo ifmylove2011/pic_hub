@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -72,6 +73,9 @@ public class ImageLoader {
 
 	private Context mContext;
 
+	/**
+	 * 新线程创建
+	 */
 	private static final ThreadFactory sThreadFactory = new ThreadFactory() {
 		private final AtomicInteger mCount = new AtomicInteger(1);
 
@@ -82,10 +86,41 @@ public class ImageLoader {
 
 	};
 
+	/**
+	 * 线程池管理
+	 */
 	public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE,
 			KEEP_ALIVE, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), sThreadFactory);
 
-	private Handler mMainHandler = new Handler(Looper.getMainLooper()) {
+	//	private Handler mMainHandler = new Handler(Looper.getMainLooper()) {
+//
+//		@Override
+//		public void handleMessage(Message msg) {
+//			switch (msg.what) {
+//				case MESSAGE_POST_RESULT:
+//					LogUtils.i("setBitmaps");
+//					LoaderResult result = (LoaderResult) msg.obj;
+//					CascadeView view = result.cascadeView;
+//					String[] uris = (String[]) view.getTag(TAG_KEY_URI);
+//					if (Arrays.equals(uris, result.uris)) {
+//						result.cascadeView.setBitmaps(result.bitmaps);
+//					} else {
+//						LogUtils.w("uri changed");
+//					}
+//			}
+//			return;
+//			// TO DO
+//		}
+//
+//	};
+	MainHandler mMainHandler = new MainHandler(Looper.getMainLooper());
+
+	static class MainHandler extends Handler {
+		Handler handler;
+
+		MainHandler(Looper looper) {
+			handler = new Handler(looper);
+		}
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -100,12 +135,11 @@ public class ImageLoader {
 					} else {
 						LogUtils.w("uri changed");
 					}
+					break;
 			}
-			return;
-			// TO DO
 		}
 
-	};
+	}
 
 	private ImageLoader(Context context) {
 		mContext = context.getApplicationContext();
@@ -146,8 +180,8 @@ public class ImageLoader {
 	/**
 	 * 获取实例
 	 *
-	 * @param context
-	 * @return
+	 * @param context 上下文
+	 * @return imageloader     类单例
 	 */
 	public static ImageLoader build(Context context) {
 		return new ImageLoader(context);
@@ -156,8 +190,8 @@ public class ImageLoader {
 	/**
 	 * 添加位图至内存缓存
 	 *
-	 * @param key
-	 * @param bitmap
+	 * @param key    键
+	 * @param bitmap 位图
 	 */
 	private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
 		if (getBitmapFromMemCache(key) == null)
@@ -167,8 +201,8 @@ public class ImageLoader {
 	/**
 	 * 从内存缓存中获取位图
 	 *
-	 * @param key
-	 * @return
+	 * @param key 键
+	 * @return bitmap      位图
 	 */
 	private Bitmap getBitmapFromMemCache(String key) {
 		return mMemoryCache.get(key);
@@ -182,10 +216,10 @@ public class ImageLoader {
 	/**
 	 * 绑定控件与位图
 	 *
-	 * @param uris
-	 * @param cascadeView
-	 * @param reqWidth
-	 * @param reqHeight
+	 * @param uris        地址
+	 * @param cascadeView 组件
+	 * @param reqWidth    要求宽度
+	 * @param reqHeight   要求高度
 	 */
 	public void bindBitmap(final String[] uris, final CascadeView cascadeView, final int reqWidth, final int reqHeight, boolean isSquare) {
 		mIsSquare = isSquare;
@@ -211,10 +245,10 @@ public class ImageLoader {
 	/**
 	 * 加载位图
 	 *
-	 * @param uri
-	 * @param reqWidth
-	 * @param reqHeight
-	 * @return
+	 * @param uri       地址
+	 * @param reqWidth  要求宽度
+	 * @param reqHeight 要求高度
+	 * @return bitmap      位图
 	 */
 	public Bitmap loadBitmap(String uri, int reqWidth, int reqHeight) {
 		Bitmap bitmap = loadBitmapFromMemCache(uri);
@@ -252,22 +286,21 @@ public class ImageLoader {
 	/**
 	 * 从内存缓存中加载位图
 	 *
-	 * @param uri
-	 * @return
+	 * @param uri 地址
+	 * @return bitmap      位图
 	 */
 	private Bitmap loadBitmapFromMemCache(String uri) {
 		final String key = hashKeyFromUri(uri);
-		Bitmap bitmap = getBitmapFromMemCache(key);
-		return bitmap;
+		return getBitmapFromMemCache(key);
 	}
 
 	/**
 	 * 从磁盘缓存中加载位图
 	 *
-	 * @param uri
-	 * @param reqWidth
-	 * @param reqHeight
-	 * @return
+	 * @param uri       地址
+	 * @param reqWidth  要求宽度
+	 * @param reqHeight 要求高度
+	 * @return bitmap      位图
 	 * @throws IOException
 	 */
 	private Bitmap loadBitmapFromDiskCache(String uri, int reqWidth, int reqHeight) throws IOException {
@@ -294,6 +327,15 @@ public class ImageLoader {
 		return bitmap;
 	}
 
+	/**
+	 * 从本地磁盘获取位图
+	 *
+	 * @param uri       地址
+	 * @param reqWidth  要求宽度
+	 * @param reqHeight 要求高度
+	 * @return bitmap      位图
+	 * @throws IOException
+	 */
 	private Bitmap loadBitmapFromLocalDisk(String uri, int reqWidth, int reqHeight) throws IOException {
 		if (Looper.myLooper() == Looper.getMainLooper()) {
 			throw new RuntimeException("better not visit local disk from UI thread");
@@ -319,10 +361,10 @@ public class ImageLoader {
 	/**
 	 * 从网络加载位图
 	 *
-	 * @param uri
-	 * @param reqWidth
-	 * @param reqHeight
-	 * @return
+	 * @param uri       地址
+	 * @param reqWidth  要求宽度
+	 * @param reqHeight 要求高度
+	 * @return bitmap      位图
 	 * @throws IOException
 	 */
 	private Bitmap loadBitmapFromHttp(String uri, int reqWidth, int reqHeight) throws IOException {
@@ -350,9 +392,9 @@ public class ImageLoader {
 	/**
 	 * 从URL下载数据流
 	 *
-	 * @param urlString
-	 * @param outputStream
-	 * @return
+	 * @param urlString    网络地址
+	 * @param outputStream 输出流
+	 * @return boolean     数据流是否准备就绪
 	 */
 	public boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
 		HttpURLConnection urlConnection = null;
@@ -368,8 +410,6 @@ public class ImageLoader {
 			while ((b = bis.read()) != -1)
 				bos.write(b);
 			return true;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -384,9 +424,9 @@ public class ImageLoader {
 	/**
 	 * 从文件读取流
 	 *
-	 * @param uri
-	 * @param outputStream
-	 * @return
+	 * @param uri          文件地址
+	 * @param outputStream 输出流
+	 * @return boolean         文件流是否准备就绪
 	 */
 	public boolean transFileToStream(String uri, OutputStream outputStream) {
 		String path = uri.substring(7);
@@ -400,8 +440,6 @@ public class ImageLoader {
 			while ((b = bis.read()) != -1)
 				bos.write(b);
 			return true;
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -414,8 +452,8 @@ public class ImageLoader {
 	/**
 	 * 从URL下载位图
 	 *
-	 * @param urlString
-	 * @return
+	 * @param urlString 地址
+	 * @return bitmap      位图
 	 */
 	private Bitmap downloadBitmapFromUrl(String urlString) {
 		Bitmap bitmap = null;
@@ -426,8 +464,6 @@ public class ImageLoader {
 			urlConnection = (HttpURLConnection) url.openConnection();
 			bis = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
 			bitmap = BitmapFactory.decodeStream(bis);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -441,8 +477,8 @@ public class ImageLoader {
 	/**
 	 * 获取某路径可用空间
 	 *
-	 * @param path
-	 * @return
+	 * @param path 文件
+	 * @return long        可用大小
 	 */
 	@SuppressLint("NewApi")
 	private long getUsableSpace(File path) {
@@ -453,6 +489,9 @@ public class ImageLoader {
 		return stats.getAvailableBytes();
 	}
 
+	/**
+	 * 加载数据封装类
+	 */
 	private static class LoaderResult {
 		public String[] uris;
 		public Bitmap[] bitmaps;
@@ -469,7 +508,7 @@ public class ImageLoader {
 	/**
 	 * 关闭输入流
 	 *
-	 * @param is
+	 * @param is 输入流
 	 */
 	public void close(InputStream is) {
 		if (is != null) {
@@ -484,7 +523,7 @@ public class ImageLoader {
 	/**
 	 * 关闭输出流
 	 *
-	 * @param os
+	 * @param os 输出流
 	 */
 	public void close(OutputStream os) {
 		if (os != null) {
@@ -499,8 +538,8 @@ public class ImageLoader {
 	/**
 	 * 从URI中取出key
 	 *
-	 * @param uri
-	 * @return
+	 * @param uri 地址
+	 * @return string      对应键
 	 */
 	public String hashKeyFromUri(String uri) {
 		String cacheKey;
@@ -517,13 +556,13 @@ public class ImageLoader {
 	/**
 	 * 字节转十六进制
 	 *
-	 * @param bytes
-	 * @return
+	 * @param bytes 字节组
+	 * @return string      十六进制符
 	 */
 	public String bytesToHexString(byte[] bytes) {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < bytes.length; i++) {
-			String hex = Integer.toHexString(0xFF & bytes[i]);
+		for (byte b : bytes) {
+			String hex = Integer.toHexString(0xFF & b);
 			if (hex.length() == 1)
 				sb.append("0");
 			sb.append(hex);

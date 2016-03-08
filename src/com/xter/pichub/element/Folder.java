@@ -9,52 +9,12 @@ import java.util.List;
  * Created by XTER on 2016/1/12.
  * 图片文件夹类（父级目录）
  */
-public class Folder implements Parcelable{
+public class Folder implements Parcelable {
 	private long folderId;
 	private String folderName;
 	private int imgCount;
-	private String coverUrl;
-
+	private String[] coverUris;
 	private List<Photo> photos;
-
-	public Folder() {
-	}
-
-	/**
-	 *
-	 * @param folderId          文件夹ID
-	 * @param folderName    文件夹名称
-	 * @param imgCount       文件数量
-	 * @param coverUrl         封面文件URL
-	 * @param photos           文件夹文件集合
-	 */
-	public Folder(long folderId, String folderName, int imgCount, String coverUrl, List<Photo> photos) {
-		this.folderId = folderId;
-		this.folderName = folderName;
-		this.imgCount = imgCount;
-		this.coverUrl = coverUrl;
-		this.photos = photos;
-	}
-
-	protected Folder(Parcel in) {
-		folderId = in.readLong();
-		folderName = in.readString();
-		imgCount = in.readInt();
-		coverUrl = in.readString();
-		photos = in.createTypedArrayList(Photo.CREATOR);
-	}
-
-	public static final Creator<Folder> CREATOR = new Creator<Folder>() {
-		@Override
-		public Folder createFromParcel(Parcel in) {
-			return new Folder(in);
-		}
-
-		@Override
-		public Folder[] newArray(int size) {
-			return new Folder[size];
-		}
-	};
 
 	public long getFolderId() {
 		return folderId;
@@ -80,12 +40,12 @@ public class Folder implements Parcelable{
 		this.imgCount = imgCount;
 	}
 
-	public String getCoverUrl() {
-		return coverUrl;
+	public String[] getCoverUris() {
+		return coverUris;
 	}
 
-	public void setCoverUrl(String coverUrl) {
-		this.coverUrl = coverUrl;
+	public void setCoverUris(String[] coverUris) {
+		this.coverUris = coverUris;
 	}
 
 	public List<Photo> getPhotos() {
@@ -96,6 +56,13 @@ public class Folder implements Parcelable{
 		this.photos = photos;
 	}
 
+	public static Creator<Folder> getCREATOR() {
+		return CREATOR;
+	}
+
+	public Folder() {
+	}
+
 	@Override
 	public int describeContents() {
 		return 0;
@@ -103,10 +70,28 @@ public class Folder implements Parcelable{
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeLong(folderId);
-		dest.writeString(folderName);
-		dest.writeInt(imgCount);
-		dest.writeString(coverUrl);
+		dest.writeLong(this.folderId);
+		dest.writeString(this.folderName);
+		dest.writeInt(this.imgCount);
+		dest.writeStringArray(this.coverUris);
 		dest.writeTypedList(photos);
 	}
+
+	protected Folder(Parcel in) {
+		this.folderId = in.readLong();
+		this.folderName = in.readString();
+		this.imgCount = in.readInt();
+		this.coverUris = in.createStringArray();
+		this.photos = in.createTypedArrayList(Photo.CREATOR);
+	}
+
+	public static final Creator<Folder> CREATOR = new Creator<Folder>() {
+		public Folder createFromParcel(Parcel source) {
+			return new Folder(source);
+		}
+
+		public Folder[] newArray(int size) {
+			return new Folder[size];
+		}
+	};
 }

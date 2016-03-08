@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.xter.picbrowser.R;
-
 /**
  * Created by XTER on 2016/1/24.
  */

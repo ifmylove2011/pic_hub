@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.xter.pichub.R;
+import com.xter.pichub.util.LogUtils;
 
 public class CascadeView extends View {
 
@@ -55,9 +56,9 @@ public class CascadeView extends View {
 		for (int i = 0; i < count; i++) {
 			int attr = a.getIndex(i);
 			switch (attr) {
-			case R.styleable.CascadeView_columns:
-				columns = a.getInt(attr, 2);
-				break;
+				case R.styleable.CascadeView_columns:
+					columns = a.getInt(attr, 2);
+					break;
 			}
 		}
 		a.recycle();
@@ -69,52 +70,52 @@ public class CascadeView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		if (isReady) {
-			int specWidthMode = MeasureSpec.getMode(widthMeasureSpec);
+//			int specWidthMode = MeasureSpec.getMode(widthMeasureSpec);
 			int specWidthSize = MeasureSpec.getSize(widthMeasureSpec);
 
 			Log.i("specWidth", ":" + specWidthSize);
 
-			if (specWidthMode == MeasureSpec.EXACTLY) {
-				totalWidth = specWidthSize;
-			} else {
-				int totalBitmapWidth = imgSize * columns + getPaddingLeft() + getPaddingRight();
-				if (specWidthMode == MeasureSpec.AT_MOST) {
-					totalWidth = Math.min(specWidthSize, totalBitmapWidth);
-				}
-			}
+//			if (specWidthMode == MeasureSpec.EXACTLY) {
+//				totalWidth = specWidthSize;
+//			} else {
+//				int totalBitmapWidth = imgSize * columns + getPaddingLeft() + getPaddingRight();
+//				if (specWidthMode == MeasureSpec.AT_MOST) {
+//					totalWidth = Math.min(specWidthSize, totalBitmapWidth);
+//				}
+//			}
 
-			int specHeightMode = MeasureSpec.getMode(heightMeasureSpec);
+//			int specHeightMode = MeasureSpec.getMode(heightMeasureSpec);
 			int specHeightSize = MeasureSpec.getSize(heightMeasureSpec);
 
 			Log.i("specHeight", ":" + specHeightSize);
 
-			if (specHeightMode == MeasureSpec.EXACTLY) {
-				totalHeight = specHeightSize;
-			} else {
-				int totalBitmapHeight = imgSize * row + getPaddingTop() + getPaddingBottom();
-				if (specHeightMode == MeasureSpec.AT_MOST) {
-					totalHeight = Math.min(specHeightSize, totalBitmapHeight);
-				}
-			}
-			Log.i("size", ":" + totalWidth + "," + totalHeight + "-->" + imgSize);
-			setMeasuredDimension(totalWidth, totalHeight);
+//			if (specHeightMode == MeasureSpec.EXACTLY) {
+//				totalHeight = specHeightSize;
+//			} else {
+//				int totalBitmapHeight = imgSize * row + getPaddingTop() + getPaddingBottom();
+//				if (specHeightMode == MeasureSpec.AT_MOST) {
+//					totalHeight = Math.min(specHeightSize, totalBitmapHeight);
+//				}
+//			}
+//			Log.i("size", ":" + totalWidth + "," + totalHeight + "-->" + imgSize);
+			int size = 360;
+			imgSize = size / columns;
+			setMeasuredDimension(size, size);
 		} else {
-			setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+			setMeasuredDimension(0, 0);
 		}
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		if (isReady) {
-			int paddingH = (totalWidth - imgSize * columns) / 2;
-			int paddingV = (totalHeight - imgSize * row) / 2;
 			for (int i = 0; i < imgCounts; i++) {
-				rect.left = imgSize * (i % columns) + paddingH;
-				rect.top = imgSize * (i / columns) + paddingV;
+				rect.left = imgSize * (i % columns);
+				rect.top = imgSize * (i / columns);
 				rect.right = imgSize + rect.left;
 				rect.bottom = imgSize + rect.top;
-				 Log.i("location", ":" + rect.left + "," + rect.top + "," +
-				 rect.right + "," + rect.bottom);
+				Log.i("location", ":" + rect.left + "," + rect.top + "," +
+						rect.right + "," + rect.bottom);
 				canvas.drawBitmap(bitmaps[i], null, rect, paint);
 			}
 		}
@@ -124,13 +125,13 @@ public class CascadeView extends View {
 	public void setBitmaps(Bitmap[] bitmaps) {
 		this.bitmaps = bitmaps;
 		imgCounts = bitmaps.length;
+		if(imgCounts==1)
+			columns = row = 1;
 		row = imgCounts % columns == 0 ? imgCounts / columns : imgCounts / columns + 1;
 		isReady = true;
-		imgSize = bitmaps[0].getWidth();
-		// reset(imgSize);
+		LogUtils.d("count"+imgCounts);
 		requestLayout();
-		 invalidate();
-		Log.i("setBitmaps", "Reset!");
+		invalidate();
 	}
 
 }
