@@ -1,5 +1,29 @@
 package com.xter.pichub.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.xter.pichub.R;
+import com.xter.pichub.lib.DiskLruCache;
+import com.xter.pichub.view.CascadeView;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,33 +35,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.StatFs;
 import android.support.v4.util.LruCache;
-
-import com.xter.pichub.R;
-import com.xter.pichub.lib.DiskLruCache;
-import com.xter.pichub.view.CascadeView;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImageLoader {
 
@@ -92,27 +89,27 @@ public class ImageLoader {
 	public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE,
 			KEEP_ALIVE, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), sThreadFactory);
 
-	//	private Handler mMainHandler = new Handler(Looper.getMainLooper()) {
-//
-//		@Override
-//		public void handleMessage(Message msg) {
-//			switch (msg.what) {
-//				case MESSAGE_POST_RESULT:
-//					LogUtils.i("setBitmaps");
-//					LoaderResult result = (LoaderResult) msg.obj;
-//					CascadeView view = result.cascadeView;
-//					String[] uris = (String[]) view.getTag(TAG_KEY_URI);
-//					if (Arrays.equals(uris, result.uris)) {
-//						result.cascadeView.setBitmaps(result.bitmaps);
-//					} else {
-//						LogUtils.w("uri changed");
-//					}
-//			}
-//			return;
-//			// TO DO
-//		}
-//
-//	};
+	// private Handler mMainHandler = new Handler(Looper.getMainLooper()) {
+	//
+	// @Override
+	// public void handleMessage(Message msg) {
+	// switch (msg.what) {
+	// case MESSAGE_POST_RESULT:
+	// LogUtils.i("setBitmaps");
+	// LoaderResult result = (LoaderResult) msg.obj;
+	// CascadeView view = result.cascadeView;
+	// String[] uris = (String[]) view.getTag(TAG_KEY_URI);
+	// if (Arrays.equals(uris, result.uris)) {
+	// result.cascadeView.setBitmaps(result.bitmaps);
+	// } else {
+	// LogUtils.w("uri changed");
+	// }
+	// }
+	// return;
+	// // TO DO
+	// }
+	//
+	// };
 	MainHandler mMainHandler = new MainHandler(Looper.getMainLooper());
 
 	static class MainHandler extends Handler {
@@ -125,17 +122,17 @@ public class ImageLoader {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case MESSAGE_POST_RESULT:
-					LogUtils.i("setBitmaps");
-					LoaderResult result = (LoaderResult) msg.obj;
-					CascadeView view = result.cascadeView;
-					String[] uris = (String[]) view.getTag(TAG_KEY_URI);
-					if (Arrays.equals(uris, result.uris)) {
-						result.cascadeView.setBitmaps(result.bitmaps);
-					} else {
-						LogUtils.w("uri changed");
-					}
-					break;
+			case MESSAGE_POST_RESULT:
+				LogUtils.i("setBitmaps");
+				LoaderResult result = (LoaderResult) msg.obj;
+				CascadeView view = result.cascadeView;
+				String[] uris = (String[]) view.getTag(TAG_KEY_URI);
+				if (Arrays.equals(uris, result.uris)) {
+					result.cascadeView.setBitmaps(result.bitmaps);
+				} else {
+					LogUtils.w("uri changed");
+				}
+				break;
 			}
 		}
 
@@ -180,8 +177,9 @@ public class ImageLoader {
 	/**
 	 * 获取实例
 	 *
-	 * @param context 上下文
-	 * @return imageloader     类单例
+	 * @param context
+	 *            上下文
+	 * @return imageloader 类单例
 	 */
 	public static ImageLoader build(Context context) {
 		return new ImageLoader(context);
@@ -190,8 +188,10 @@ public class ImageLoader {
 	/**
 	 * 添加位图至内存缓存
 	 *
-	 * @param key    键
-	 * @param bitmap 位图
+	 * @param key
+	 *            键
+	 * @param bitmap
+	 *            位图
 	 */
 	private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
 		if (getBitmapFromMemCache(key) == null)
@@ -201,8 +201,9 @@ public class ImageLoader {
 	/**
 	 * 从内存缓存中获取位图
 	 *
-	 * @param key 键
-	 * @return bitmap      位图
+	 * @param key
+	 *            键
+	 * @return bitmap 位图
 	 */
 	private Bitmap getBitmapFromMemCache(String key) {
 		return mMemoryCache.get(key);
@@ -210,18 +211,23 @@ public class ImageLoader {
 
 	public void bindBitmap(final String[] uris, final CascadeView c, boolean isSquare) {
 		mIsSquare = isSquare;
-		bindBitmap(uris, c, 0, 0, isSquare);
+		bindBitmap(uris, c, ViewUtils.getDefaultSize() / 4, ViewUtils.getDefaultSize() / 4, isSquare);
 	}
 
 	/**
 	 * 绑定控件与位图
 	 *
-	 * @param uris        地址
-	 * @param cascadeView 组件
-	 * @param reqWidth    要求宽度
-	 * @param reqHeight   要求高度
+	 * @param uris
+	 *            地址
+	 * @param cascadeView
+	 *            组件
+	 * @param reqWidth
+	 *            要求宽度
+	 * @param reqHeight
+	 *            要求高度
 	 */
-	public void bindBitmap(final String[] uris, final CascadeView cascadeView, final int reqWidth, final int reqHeight, boolean isSquare) {
+	public void bindBitmap(final String[] uris, final CascadeView cascadeView, final int reqWidth, final int reqHeight,
+			boolean isSquare) {
 		mIsSquare = isSquare;
 		cascadeView.setTag(TAG_KEY_URI, uris);
 
@@ -245,10 +251,13 @@ public class ImageLoader {
 	/**
 	 * 加载位图
 	 *
-	 * @param uri       地址
-	 * @param reqWidth  要求宽度
-	 * @param reqHeight 要求高度
-	 * @return bitmap      位图
+	 * @param uri
+	 *            地址
+	 * @param reqWidth
+	 *            要求宽度
+	 * @param reqHeight
+	 *            要求高度
+	 * @return bitmap 位图
 	 */
 	public Bitmap loadBitmap(String uri, int reqWidth, int reqHeight) {
 		Bitmap bitmap = loadBitmapFromMemCache(uri);
@@ -286,8 +295,9 @@ public class ImageLoader {
 	/**
 	 * 从内存缓存中加载位图
 	 *
-	 * @param uri 地址
-	 * @return bitmap      位图
+	 * @param uri
+	 *            地址
+	 * @return bitmap 位图
 	 */
 	private Bitmap loadBitmapFromMemCache(String uri) {
 		final String key = hashKeyFromUri(uri);
@@ -297,10 +307,13 @@ public class ImageLoader {
 	/**
 	 * 从磁盘缓存中加载位图
 	 *
-	 * @param uri       地址
-	 * @param reqWidth  要求宽度
-	 * @param reqHeight 要求高度
-	 * @return bitmap      位图
+	 * @param uri
+	 *            地址
+	 * @param reqWidth
+	 *            要求宽度
+	 * @param reqHeight
+	 *            要求高度
+	 * @return bitmap 位图
 	 * @throws IOException
 	 */
 	private Bitmap loadBitmapFromDiskCache(String uri, int reqWidth, int reqHeight) throws IOException {
@@ -330,10 +343,13 @@ public class ImageLoader {
 	/**
 	 * 从本地磁盘获取位图
 	 *
-	 * @param uri       地址
-	 * @param reqWidth  要求宽度
-	 * @param reqHeight 要求高度
-	 * @return bitmap      位图
+	 * @param uri
+	 *            地址
+	 * @param reqWidth
+	 *            要求宽度
+	 * @param reqHeight
+	 *            要求高度
+	 * @return bitmap 位图
 	 * @throws IOException
 	 */
 	private Bitmap loadBitmapFromLocalDisk(String uri, int reqWidth, int reqHeight) throws IOException {
@@ -361,10 +377,13 @@ public class ImageLoader {
 	/**
 	 * 从网络加载位图
 	 *
-	 * @param uri       地址
-	 * @param reqWidth  要求宽度
-	 * @param reqHeight 要求高度
-	 * @return bitmap      位图
+	 * @param uri
+	 *            地址
+	 * @param reqWidth
+	 *            要求宽度
+	 * @param reqHeight
+	 *            要求高度
+	 * @return bitmap 位图
 	 * @throws IOException
 	 */
 	private Bitmap loadBitmapFromHttp(String uri, int reqWidth, int reqHeight) throws IOException {
@@ -392,9 +411,11 @@ public class ImageLoader {
 	/**
 	 * 从URL下载数据流
 	 *
-	 * @param urlString    网络地址
-	 * @param outputStream 输出流
-	 * @return boolean     数据流是否准备就绪
+	 * @param urlString
+	 *            网络地址
+	 * @param outputStream
+	 *            输出流
+	 * @return boolean 数据流是否准备就绪
 	 */
 	public boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
 		HttpURLConnection urlConnection = null;
@@ -424,9 +445,11 @@ public class ImageLoader {
 	/**
 	 * 从文件读取流
 	 *
-	 * @param uri          文件地址
-	 * @param outputStream 输出流
-	 * @return boolean         文件流是否准备就绪
+	 * @param uri
+	 *            文件地址
+	 * @param outputStream
+	 *            输出流
+	 * @return boolean 文件流是否准备就绪
 	 */
 	public boolean transFileToStream(String uri, OutputStream outputStream) {
 		String path = uri.substring(7);
@@ -452,8 +475,9 @@ public class ImageLoader {
 	/**
 	 * 从URL下载位图
 	 *
-	 * @param urlString 地址
-	 * @return bitmap      位图
+	 * @param urlString
+	 *            地址
+	 * @return bitmap 位图
 	 */
 	private Bitmap downloadBitmapFromUrl(String urlString) {
 		Bitmap bitmap = null;
@@ -477,8 +501,9 @@ public class ImageLoader {
 	/**
 	 * 获取某路径可用空间
 	 *
-	 * @param path 文件
-	 * @return long        可用大小
+	 * @param path
+	 *            文件
+	 * @return long 可用大小
 	 */
 	@SuppressLint("NewApi")
 	private long getUsableSpace(File path) {
@@ -508,7 +533,8 @@ public class ImageLoader {
 	/**
 	 * 关闭输入流
 	 *
-	 * @param is 输入流
+	 * @param is
+	 *            输入流
 	 */
 	public void close(InputStream is) {
 		if (is != null) {
@@ -523,7 +549,8 @@ public class ImageLoader {
 	/**
 	 * 关闭输出流
 	 *
-	 * @param os 输出流
+	 * @param os
+	 *            输出流
 	 */
 	public void close(OutputStream os) {
 		if (os != null) {
@@ -538,8 +565,9 @@ public class ImageLoader {
 	/**
 	 * 从URI中取出key
 	 *
-	 * @param uri 地址
-	 * @return string      对应键
+	 * @param uri
+	 *            地址
+	 * @return string 对应键
 	 */
 	public String hashKeyFromUri(String uri) {
 		String cacheKey;
@@ -556,8 +584,9 @@ public class ImageLoader {
 	/**
 	 * 字节转十六进制
 	 *
-	 * @param bytes 字节组
-	 * @return string      十六进制符
+	 * @param bytes
+	 *            字节组
+	 * @return string 十六进制符
 	 */
 	public String bytesToHexString(byte[] bytes) {
 		StringBuilder sb = new StringBuilder();

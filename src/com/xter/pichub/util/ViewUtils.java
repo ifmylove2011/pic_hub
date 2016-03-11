@@ -15,20 +15,15 @@ import android.widget.LinearLayout;
 public class ViewUtils {
 	@SuppressLint("NewApi")
 	public static void hideSystemUI(View view) {
-		view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-				| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-				| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-				| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-				| View.SYSTEM_UI_FLAG_FULLSCREEN
-				| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+		view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+				| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+				| View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 	}
 
 	@SuppressLint("NewApi")
 	public static void showSystemUI(View view) {
-		view.setSystemUiVisibility(
-				View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-						| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-						| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+		view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+				| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 	}
 
 	/* 获得状态栏高度 */
@@ -46,27 +41,34 @@ public class ViewUtils {
 		int actionBarHeight = 0;
 		TypedValue tv = new TypedValue();
 		if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-			actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+			actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,
+					context.getResources().getDisplayMetrics());
 		}
 		return actionBarHeight;
 	}
 
 	/* 得到系统栏高度 */
-	public static int getSystemBarHeight(Context context){
-		return getActionBarHeight(context)+getStatusBarHeight(context);
+	public static int getSystemBarHeight(Context context) {
+		return getActionBarHeight(context) + getStatusBarHeight(context);
 	}
 
 	/* 得到系统栏（包括状栏和操作栏）而已参数 */
 	public static LinearLayout.LayoutParams getSystemBarParam(Context context) {
 		int occupyHeight = getActionBarHeight(context) + getStatusBarHeight(context);
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, occupyHeight);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+				occupyHeight);
 		return layoutParams;
 	}
 
-	/*  获取屏幕像素大小 */
+	/* 获取屏幕像素大小 */
 	public static Point getScreenSize() {
 		DisplayMetrics dm = ContextUtils.getInstance().getResources().getDisplayMetrics();
 		Point size = new Point(dm.widthPixels, dm.heightPixels);
 		return size;
+	}
+
+	public static int getDefaultSize() {
+		DisplayMetrics dm = ContextUtils.getInstance().getResources().getDisplayMetrics();
+		return Math.min(dm.widthPixels, dm.heightPixels);
 	}
 }
