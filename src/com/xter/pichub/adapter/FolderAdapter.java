@@ -1,18 +1,17 @@
 package com.xter.pichub.adapter;
 
+import java.util.List;
+
+import com.xter.pichub.R;
+import com.xter.pichub.element.Folder;
+import com.xter.pichub.util.ImageLoader;
+import com.xter.pichub.view.CascadeView;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-
-import com.xter.pichub.R;
-import com.xter.pichub.element.Folder;
-import com.xter.pichub.element.Photo;
-import com.xter.pichub.util.ImageLoader;
-import com.xter.pichub.view.CascadeView;
-
-import java.util.List;
 
 /**
  * Created by XTER on 2016/1/11.
