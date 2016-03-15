@@ -10,6 +10,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 
 public class BitmapUtils {
@@ -171,4 +174,24 @@ public class BitmapUtils {
 		return Bitmap.createBitmap(1, 1, Config.RGB_565);
 	}
 
+
+	/**
+	 * 合并图片
+	 *
+	 * @param bitmaps 位图资源
+	 * @param size    大小
+	 * @param padding 间距
+	 * @return bitmap      位图
+	 */
+	public static Bitmap combineBitmaps(Bitmap[] bitmaps, int size, int padding) {
+		int length = bitmaps.length;
+		int columns = (int) (length / Math.sqrt(length) >= Math.sqrt(length) ? Math.sqrt(length) : Math.sqrt(length) + 1);
+		Bitmap bitmap = Bitmap.createBitmap(columns * size + (columns - 1) * padding, columns * size + (columns - 1) * padding, Config.RGB_565);
+		Paint paint = new Paint();
+		Canvas c = new Canvas(bitmap);
+		for (int i = 0; i < length; i++) {
+			c.drawBitmap(bitmaps[i], i % columns * size + (i % columns - 1) * padding, i / columns * size + (i / columns - 1) * padding, paint);
+		}
+		return bitmap;
+	}
 }
