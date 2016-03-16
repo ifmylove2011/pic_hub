@@ -3,7 +3,10 @@ package com.xter.pichub;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.xter.pichub.aidl.ICrypt;
 import com.xter.pichub.base.BaseActivity;
+import com.xter.pichub.binder.BinderPool;
+import com.xter.pichub.binder.ICryptImpl;
 import com.xter.pichub.element.Folder;
 import com.xter.pichub.element.Photo;
 import com.xter.pichub.fragment.FolderFragment;
@@ -11,6 +14,7 @@ import com.xter.pichub.fragment.FolderFragment.OnFolderClickListener;
 import com.xter.pichub.fragment.PhotoFragment;
 import com.xter.pichub.fragment.PhotoFragment.OnPhotosClickListener;
 import com.xter.pichub.lib.SystemBarTintManager;
+import com.xter.pichub.util.LogUtils;
 import com.xter.pichub.util.ViewUtils;
 
 import android.app.Fragment;
@@ -19,9 +23,10 @@ import android.app.FragmentTransaction;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -67,6 +72,13 @@ public class AlbumActivity extends BaseActivity implements OnFolderClickListener
 		// 菜单适配器
 		// lvDrawerMenu.setAdapter(new
 		// DrawerMenuAdpater(this,DataLayer.drawerMenuImages,DataLayer.drawerMenuTexts));
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				doCrypt();
+			}
+		}).start();
 	}
 
 	protected void initSystemBar() {
@@ -254,5 +266,19 @@ public class AlbumActivity extends BaseActivity implements OnFolderClickListener
 	@Override
 	public void onPhotosClick(List<Photo> pics, int position, String folderName) {
 
+	}
+	
+	protected void doCrypt(){
+		BinderPool binderPool = BinderPool.getInstance(AlbumActivity.this);
+		IBinder cryptBinder = binderPool.queryBinder(BinderPool.BINDER_CRYPT);
+		ICrypt crypt = ICryptImpl.asInterface(cryptBinder);
+		LogUtils.d("visit crypt");
+		String msg = "I'm coming.The holo world";
+		try {
+			String password = crypt.md5Encrypt(msg, 2);
+			LogUtils.w("encrypt:"+password);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 }
