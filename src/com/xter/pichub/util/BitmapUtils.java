@@ -2,7 +2,6 @@ package com.xter.pichub.util;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.annotation.SuppressLint;
@@ -12,7 +11,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Build;
 
 public class BitmapUtils {
@@ -103,7 +101,6 @@ public class BitmapUtils {
 	 * @throws IOException
 	 */
 	public static Bitmap decodeBitmapFromFileDescriptor(FileDescriptor fd, int reqWidth, int reqHeight) throws IOException {
-		@SuppressWarnings("resource")
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFileDescriptor(fd, null, options);
@@ -132,7 +129,7 @@ public class BitmapUtils {
 	 * @param options   参数设置
 	 * @param reqWidth  目标宽度
 	 * @param reqHeight 目标高度
-	 * @return inSampleSize 采样率
+	 * @return inSampleSize 采样率	
 	 */
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		if (reqHeight == 0 || reqWidth == 0)

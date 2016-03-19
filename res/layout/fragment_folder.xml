@@ -21,7 +21,7 @@
             <com.xter.pichub.view.AlbumGridView
                 android:id="@+id/gv_folder"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:horizontalSpacing="@dimen/dimen_2"
                 android:numColumns="2"
                 android:verticalSpacing="@dimen/dimen_2" />

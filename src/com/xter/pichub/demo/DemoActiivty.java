@@ -1,16 +1,18 @@
 package com.xter.pichub.demo;
 
+import com.xter.pichub.R;
+import com.xter.pichub.util.BitmapUtils;
+import com.xter.pichub.util.SysUtils;
+import com.xter.pichub.view.BitmapSurface;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-
-import com.xter.pichub.R;
-import com.xter.pichub.util.BitmapUtils;
-import com.xter.pichub.view.BitmapSurface;
 
 public class DemoActiivty extends Activity {
 
@@ -36,6 +38,7 @@ public class DemoActiivty extends Activity {
 			bitmaps[i] = BitmapFactory.decodeResource(getResources(),R.drawable.ic_launcher);
 		}
 		image.setImageBitmap(BitmapUtils.combineBitmaps(bitmaps,100,2));
+		SysUtils.setAlarmTime(this, 15*1000);
 	}
 
 	@Override
@@ -52,4 +55,11 @@ public class DemoActiivty extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	protected void onPause() {
+		SysUtils.cancelAlarm(this);
+		super.onPause();
+	}
+	
 }

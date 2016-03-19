@@ -4,17 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <!--
-         <com.xter.pichub.view.CascadeView
+    <com.xter.pichub.view.CascadeView
         android:id="@+id/cv_folder_cover"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:columns="2"/>
-    -->
-
-    <ImageView
-        android:id="@+id/cv_folder_cover"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        app:columns="2" />
 
 </RelativeLayout>

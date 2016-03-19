@@ -7,6 +7,7 @@ import com.xter.pichub.aidl.ICrypt;
 import com.xter.pichub.base.BaseActivity;
 import com.xter.pichub.binder.BinderPool;
 import com.xter.pichub.binder.ICryptImpl;
+import com.xter.pichub.demo.DemoActiivty;
 import com.xter.pichub.element.Folder;
 import com.xter.pichub.element.Photo;
 import com.xter.pichub.fragment.FolderFragment;
@@ -20,6 +21,7 @@ import com.xter.pichub.util.ViewUtils;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +29,9 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -44,7 +49,7 @@ public class AlbumActivity extends BaseActivity implements OnFolderClickListener
 	private PhotoFragment photoFragment;
 
 	SystemBarTintManager tintManager;
-	// private DrawerLayout drawerMenu;
+	 private DrawerLayout drawerMenu;
 	private ListView lvDrawerMenu;
 
 	@Override
@@ -279,6 +284,26 @@ public class AlbumActivity extends BaseActivity implements OnFolderClickListener
 			LogUtils.w("encrypt:"+password);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_album, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		switch (id) {
+			case R.id.action_settings:
+//				Toast.makeText(getApplicationContext(), getString(R.string.action_settings), Toast.LENGTH_SHORT).show();
+//				drawerMenu.openDrawer(Gravity.LEFT);
+				startActivity(new Intent(AlbumActivity.this,DemoActiivty.class));
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 }

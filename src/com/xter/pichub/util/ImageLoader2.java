@@ -137,7 +137,7 @@ public class ImageLoader2 {
 
 	}
 
-	ImageLoader2(Context context) {
+	private ImageLoader2(Context context) {
 		mContext = context.getApplicationContext();
 		int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 		int cacheSize = maxMemory / 8;

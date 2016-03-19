@@ -1,6 +1,7 @@
 package com.xter.pichub.view;
 
 import com.xter.pichub.R;
+import com.xter.pichub.util.BitmapUtils;
 import com.xter.pichub.util.LogUtils;
 import com.xter.pichub.util.ViewUtils;
 
@@ -65,7 +66,7 @@ public class CascadeView extends View {
 		rect = new Rect();
 		paint = new Paint();
 
-		totalSize = ViewUtils.getDefaultSize();
+		totalSize = ViewUtils.getDefaultSize()/columns -getPaddingTop() - getPaddingBottom();
 	}
 
 	@Override
@@ -127,7 +128,6 @@ public class CascadeView extends View {
 		} else {
 			goLayout = true;
 		}
-
 	}
 
 	@Override
@@ -140,7 +140,10 @@ public class CascadeView extends View {
 				rect.right = imgSize + rect.left;
 				rect.bottom = imgSize + rect.top;
 				LogUtils.i("location:" + rect.left + "," + rect.top + "," + rect.right + "," + rect.bottom);
-				canvas.drawBitmap(bitmaps[i], null, rect, paint);
+				if (bitmaps[i] != null)
+					canvas.drawBitmap(bitmaps[i], null, rect, paint);
+				else
+					canvas.drawBitmap(BitmapUtils.getDefaultBitmap(), null, rect, paint);
 			}
 		}
 	}

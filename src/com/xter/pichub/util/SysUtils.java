@@ -1,12 +1,15 @@
 package com.xter.pichub.util;
 
-import android.content.Context;
-import android.os.Environment;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Environment;
 
 /**
  * Created by XTER on 2016/3/7.
@@ -83,5 +86,20 @@ public class SysUtils {
 	public static int sp2px(Context context, float spValue) {
 		final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
 		return (int) (spValue * fontScale + 0.5f);
+	}
+
+	/* 闹钟 */
+	public static void setAlarmTime(Context context, long time) {
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent("com.xter.receiver.Life");
+		PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + time, sender);
+	}
+
+	public static void cancelAlarm(Context context) {
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent("com.xter.receiver.Life");
+		PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
+		am.cancel(sender);
 	}
 }

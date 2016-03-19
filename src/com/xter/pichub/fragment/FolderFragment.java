@@ -6,12 +6,14 @@ import com.xter.pichub.R;
 import com.xter.pichub.adapter.FolderAdapter;
 import com.xter.pichub.base.BaseFragment;
 import com.xter.pichub.element.Folder;
+import com.xter.pichub.util.LogUtils;
 import com.xter.pichub.util.ViewUtils;
 import com.xter.pichub.view.AlbumGridView;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +35,8 @@ public class FolderFragment extends BaseFragment {
 	private OnFolderClickListener onFolderClickListener;
 
 	private List<Folder> folders;
+	
+	private Handler handler;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,10 +73,12 @@ public class FolderFragment extends BaseFragment {
 				onFolderClickListener.onFolderClick(folders.get(position));
 			}
 		});
+		
 		// 使空白区域获取焦点，避免因为gridview抢夺焦点而使其无法显示空白区域
 		// viewSpace.setFocusable(true);
 		// viewSpace.setFocusableInTouchMode(true);
 		// viewSpace.requestFocus();
+		LogUtils.d("folderAlbum"+gvFolderAlbum.getHeight());
 	}
 
 	@Override
@@ -80,6 +86,13 @@ public class FolderFragment extends BaseFragment {
 		super.onAttach(activity);
 		if (onFolderClickListener == null)
 			onFolderClickListener = (OnFolderClickListener) activity;
+	}
+	
+	protected void setAdapterHigh(AlbumGridView view){
+		android.view.ViewGroup.LayoutParams layout = view.getLayoutParams();
+		int row = view.getCount()/view.getNumColumns();
+		layout.height = view.getVerticalSpacing()*(row-1)+ view.getChildAt(0).getHeight()*row;
+		view.setLayoutParams(layout);
 	}
 
 }
