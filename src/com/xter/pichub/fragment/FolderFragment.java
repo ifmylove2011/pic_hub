@@ -13,7 +13,6 @@ import com.xter.pichub.view.AlbumGridView;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +35,6 @@ public class FolderFragment extends BaseFragment {
 
 	private List<Folder> folders;
 	
-	private Handler handler;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
