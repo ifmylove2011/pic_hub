@@ -258,14 +258,18 @@ public class AlbumActivity extends BaseActivity implements OnFolderClickListener
 
 	@Override
 	public void onFolderClick(Folder folder) {
-		if (photoFragment == null) {
-			photoFragment = new PhotoFragment();
-		}
-		// 准备传递数据
-		Bundle bundle = new Bundle();
-		bundle.putParcelable("folder", folder);
-		photoFragment.setArguments(bundle);
-		switchContent(folderFragment, photoFragment, "photos");
+//		if (photoFragment == null) {
+//			photoFragment = new PhotoFragment();
+//		}
+//		// 准备传递数据
+//		Bundle bundle = new Bundle();
+//		bundle.putParcelable("folder", folder);
+//		photoFragment.setArguments(bundle);
+//		switchContent(folderFragment, photoFragment, "photos");
+		
+		Intent intent = new Intent(AlbumActivity.this,DemoActiivty.class);
+		intent.putExtra("folder", folder);
+		startActivity(intent);
 	}
 
 	@Override

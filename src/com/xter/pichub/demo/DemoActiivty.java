@@ -1,23 +1,24 @@
 package com.xter.pichub.demo;
 
+import java.util.List;
+
 import com.xter.pichub.R;
-import com.xter.pichub.util.BitmapUtils;
-import com.xter.pichub.util.SysUtils;
-import com.xter.pichub.view.BitmapSurface;
+import com.xter.pichub.element.Folder;
+import com.xter.pichub.element.Photo;
+import com.xter.pichub.util.ImageLoader4;
+import com.xter.pichub.view.RootView;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 
 public class DemoActiivty extends Activity {
 
-	private BitmapSurface bitSur;
-	private ImageView image;
+	private RootView rootView;
+	ImageLoader4 loader;
+	List<Folder> folders;
+	Folder folder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,18 +28,20 @@ public class DemoActiivty extends Activity {
 		initData();
 	}
 
-	protected void initLayout(){
-		bitSur = (BitmapSurface) findViewById(R.id.bit_sur);
-		image = (ImageView) findViewById(R.id.image_demo);
+	protected void initLayout() {
+		rootView = (RootView) findViewById(R.id.root);
 	}
 
-	protected void initData(){
-		Bitmap[] bitmaps = new Bitmap[4];
-		for(int i=0;i<4;i++){
-			bitmaps[i] = BitmapFactory.decodeResource(getResources(),R.drawable.ic_launcher);
+	protected void initData() {
+		folder = getIntent().getParcelableExtra("folder");
+		List<Photo> photos = folder.getPhotos();
+		int size = photos.size();
+		loader = ImageLoader4.build(this);
+		String[] uris = new String[size];
+		for (int i = 0; i < size; i++) {
+			uris[i] = "file://" + photos.get(i).getPath();
 		}
-		image.setImageBitmap(BitmapUtils.combineBitmaps(bitmaps,100,2));
-		SysUtils.setAlarmTime(this, 15*1000);
+		loader.bindBitmap(uris, rootView, true);
 	}
 
 	@Override
@@ -55,11 +58,11 @@ public class DemoActiivty extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	protected void onPause() {
-		SysUtils.cancelAlarm(this);
+		// SysUtils.cancelAlarm(this);
 		super.onPause();
 	}
-	
+
 }
